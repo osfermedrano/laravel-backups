@@ -55,15 +55,28 @@ class BackupFinalizado extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $mail = (new MailMessage)
-            ->subject($this->resultado->ok ? 'Backup generado' : 'Backup fallido')
-            ->line($this->mensaje());
+        $ok = $this->resultado->ok;
+        $titulo = $ok ? 'Backup generado' : 'Backup fallido';
+        $app = (string) config('app.name');
 
-        if ($this->resultado->ok) {
-            return $mail->action('Descargar backup', $this->url())
-                ->line('El archivo está cifrado: se abre con la contraseña de BACKUP_ARCHIVE_PASSWORD.');
-        }
-
-        return $mail->error()->line('Revisá el log del sistema para más detalle.');
+        return (new MailMessage)
+            ->subject(($ok ? '✓ ' : '✗ ')."{$titulo} · {$app}")
+            ->view(
+                ['backups::mail.backup-finalizado', 'backups::mail.backup-finalizado-texto'],
+                [
+                    'ok' => $ok,
+                    'titulo' => $titulo,
+                    'resumen' => $this->mensaje(),
+                    'app' => $app,
+                    'fecha' => now()->format('d/m/Y H:i'),
+                    'archivo' => $this->resultado->nombre(),
+                    'tamanio' => RepositorioBackups::tamanio($this->resultado->bytes),
+                    'drive' => $this->resultado->drive,
+                    'driveMotivo' => $this->resultado->driveMotivo,
+                    'motivo' => $this->resultado->motivo,
+                    'servidor' => parse_url((string) config('app.url'), PHP_URL_HOST) ?: gethostname(),
+                    'url' => $this->url() ?? route('backups.index'),
+                ],
+            );
     }
 }

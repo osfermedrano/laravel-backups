@@ -169,11 +169,11 @@ class GenerarBackupJobTest extends TestCase
         $url = route('backups.descargar', '2026-11-02-03-00-00.zip');
 
         $ok = new BackupFinalizado(ResultadoBackup::ok('mi-app/2026-11-02-03-00-00.zip', 2048));
-        $this->assertSame($url, $ok->toMail(new User)->actionUrl);
+        $this->assertStringContainsString($url, (string) $ok->toMail(new User)->render());
         $this->assertSame($url, $ok->toArray(new User)['url']);
 
         $mal = new BackupFinalizado(ResultadoBackup::fallo('disco lleno'));
-        $this->assertNull($mal->toMail(new User)->actionUrl);
+        $this->assertStringNotContainsString('/descargar', (string) $mal->toMail(new User)->render());
         $this->assertNull($mal->toArray(new User)['url']);
     }
 

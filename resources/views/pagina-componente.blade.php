@@ -1,3 +1,5 @@
 <x-dynamic-component :component="$componente">
-    @include('backups::panel')
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        @include('backups::panel')
+    </div>
 </x-dynamic-component>
