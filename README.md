@@ -53,6 +53,11 @@ Gate::define('backups.gestionar', fn ($user) => $user->is_admin);
 ## Panel
 
 - Página propia: `/admin/backups` (ruta `backups.index`). Para usar tu layout: `backups.layout` (`@extends`) o `backups.componente` (ej. `app-layout`).
+- Header de la página propia: si tu layout dibuja el header (título, tema, notificaciones) solo cuando recibe `$header` (como Breeze), configurá `backups.header.titulo`. Va al slot `header` (con `componente`) o a la sección `header` (con `layout`). Con `backups.header.vista` usás tu propio componente de título; la vista recibe `$titulo`:
+
+```php
+'header' => ['titulo' => 'Backups', 'vista' => 'backups-header'], // resources/views/backups-header.blade.php
+```
 - Embebido en tu página de configuración:
 
 ```blade

@@ -47,6 +47,16 @@ return [
     'seccion' => 'content',
     'componente' => null,
 
+    /*
+    | Header de la página propia (slot "header" del componente o sección "header" del layout),
+    | para layouts que dibujan título, tema o notificaciones solo si lo reciben.
+    | titulo null = sin header. vista = vista propia del proyecto (recibe $titulo); null = <h2> simple.
+    */
+    'header' => [
+        'titulo' => null,
+        'vista' => null,
+    ],
+
     // A dónde volver tras generar/conectar/desconectar (panel embebido). null = página del paquete.
     // Ej: ['ruta' => 'admin.configuracion', 'parametros' => ['tab' => 'backups']]
     'volver_a' => null,

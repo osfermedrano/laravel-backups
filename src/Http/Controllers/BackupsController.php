@@ -14,12 +14,14 @@ class BackupsController extends Controller
 
     public function index()
     {
+        $titulo = config('backups.header.titulo');
+
         if ($layout = config('backups.layout')) {
-            return view('backups::pagina-layout', ['layout' => $layout, 'seccion' => config('backups.seccion', 'content')]);
+            return view('backups::pagina-layout', ['layout' => $layout, 'seccion' => config('backups.seccion', 'content'), 'titulo' => $titulo]);
         }
 
         if ($componente = config('backups.componente')) {
-            return view('backups::pagina-componente', ['componente' => $componente]);
+            return view('backups::pagina-componente', ['componente' => $componente, 'titulo' => $titulo]);
         }
 
         return view('backups::pagina');

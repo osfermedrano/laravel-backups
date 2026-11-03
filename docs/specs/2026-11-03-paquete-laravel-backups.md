@@ -33,6 +33,7 @@ Backup de BD cifrado (AES-256) en cola, manual + diario, retención 7d/4s/6m/1a,
 - [ ] CA11 — Panel embebible: `@include('backups::panel')` dentro de la página de configuración de cada proyecto, o página propia `/{prefijo}/backups` usando el layout configurado.
 - [ ] CA12 — Scheduler registrado por el paquete (desactivable por config).
 - [ ] CA13 — `abonados` migra al paquete: borra `app/Backup/*` y afines, mismo comportamiento; su suite completa sigue verde.
+- [ ] CA14 — Página propia con el **header del layout**: `backups.header.titulo` (null = sin header, como antes) llena el slot `header` (con `componente`) o la sección `header` (con `layout`). Por defecto un `<h2>` con el título; `backups.header.vista` = vista propia del proyecto, que recibe `$titulo`. Motivo: layouts tipo Breeze dibujan el header (tema, campana, usuario) solo `@isset($header)` → tccticket quedaba sin header. *(Agregado 2026-11-03, v1.2.0.)*
 
 ## Fuera de alcance
 - Laravel 10 (3 proyectos: htc-os, jornadadecomunicacion, logcentralhtc).
