@@ -67,7 +67,7 @@ Tailwind: agregá las vistas del paquete al escaneo de clases, por ejemplo `@sou
 
 - **Scheduler** (`* * * * * php artisan schedule:run`): el paquete programa backup 03:00, `backup:clean` 03:30 y `backups:limpiar-drive` 03:40 (configurable, desactivable con `BACKUPS_PROGRAMACION=false`).
 - **Worker de colas** (Supervisor) con `--timeout` ≥ 600. Tras cada deploy: `php artisan queue:restart`.
-- Notificaciones: tabla `notifications` (`php artisan make:notification-table`) y que el modelo de usuario use `Notifiable`. El aviso guarda `tipo = backup`, `ok`, `mensaje`, `url`.
+- Notificaciones: tabla `notifications` (`php artisan make:notifications-table`) y que el modelo de usuario use `Notifiable`. El aviso guarda `tipo = backup`, `ok`, `mensaje`, `url`.
 
 ## Publicables
 
