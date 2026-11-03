@@ -30,6 +30,12 @@ jobs:
           extensions: pdo_sqlite, sqlite3, zip, sodium
           coverage: none
 
+      # Laravel 11 ya no recibe parches: Composer bloquea todas sus versiones por advisories.
+      # Se permite SOLO en CI para verificar compatibilidad; los proyectos deberían migrar a 12+.
+      - name: Permitir Laravel 11 (sin parches de seguridad)
+        if: matrix.laravel == '11.*'
+        run: composer config audit.block-insecure false
+
       - name: Instalar dependencias
         run: |
           composer require --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
