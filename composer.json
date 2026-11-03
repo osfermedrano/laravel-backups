@@ -1,0 +1,54 @@
+{
+    "name": "osfermedrano/laravel-backups",
+    "description": "Backups de base de datos cifrados, en cola, con avisos y copia en Google Drive para Laravel 11-13.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "backup", "google-drive", "spatie"],
+    "authors": [
+        {
+            "name": "osfermedrano"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/database": "^11.0|^12.0|^13.0",
+        "illuminate/notifications": "^11.0|^12.0|^13.0",
+        "illuminate/queue": "^11.0|^12.0|^13.0",
+        "spatie/laravel-backup": "^9.0|^10.0",
+        "google/apiclient": "^2.20"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Osfermedrano\\Backups\\": "src/",
+            "Osfermedrano\\Backups\\Database\\Migrations\\": "database/migrations/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Osfermedrano\\Backups\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Osfermedrano\\Backups\\BackupsServiceProvider"
+            ]
+        },
+        "google/apiclient-services": ["Drive"]
+    },
+    "scripts": {
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup",
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
