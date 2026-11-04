@@ -158,57 +158,35 @@
         </div>
     @endif
 
-    {{-- Listado --}}
-    <section class="{{ $tarjeta }} overflow-hidden">
-        <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-zinc-700">
+    {{-- Con adjuntos, generar aplica a las dos secciones: va en su propia tarjeta --}}
+    @if ($adjuntosActivos)
+        <section class="{{ $tarjeta }} px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h3 class="text-base font-bold text-gray-900 dark:text-zinc-50">Últimos backups</h3>
-                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Base de datos completa, cifrada. Los viejos se depuran según la retención.</p>
+                <h3 class="text-base font-bold text-gray-900 dark:text-zinc-50">Generar backup</h3>
+                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Elegí qué respaldar. Cada tipo genera su propio zip cifrado.</p>
             </div>
-            <form method="POST" action="{{ route('backups.generar') }}" class="shrink-0 flex flex-col sm:flex-row sm:items-center gap-3"
-                onsubmit="var b=this.querySelector('button');b.disabled=true;b.querySelector('span').textContent='Encolando...';">
-                @csrf
-                @if ($adjuntosActivos)
-                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-200">
-                        <input type="checkbox" name="tipos[]" value="bd" checked class="rounded border-gray-300 text-violet-600 focus:ring-violet-500">
-                        Base de datos
-                    </label>
-                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-200">
-                        <input type="checkbox" name="tipos[]" value="adjuntos" class="rounded border-gray-300 text-violet-600 focus:ring-violet-500">
-                        Adjuntos
-                    </label>
-                @endif
-                <button type="submit" @disabled($enProceso || $sinPassword)
-                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                    <span>{{ $enProceso ? 'Generando…' : 'Generar backup ahora' }}</span>
-                </button>
-            </form>
+            @include('backups::partials.formulario')
+        </section>
+    @endif
+
+    {{-- Base de datos --}}
+    <section data-seccion="bd" class="{{ $tarjeta }} overflow-hidden">
+        <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-zinc-700">
+            @include('backups::partials.encabezado-seccion', [
+                'titulo' => $adjuntosActivos ? 'Base de datos' : 'Últimos backups',
+                'detalle' => 'Base de datos completa, cifrada. Los viejos se depuran según la retención.',
+                'icono' => 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125',
+                'color' => 'bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300',
+            ])
+            @unless ($adjuntosActivos)
+                @include('backups::partials.formulario')
+            @endunless
         </div>
 
         @if ($ultimos->isNotEmpty())
             <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
                 @foreach ($ultimos as $b)
-                    <li class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-zinc-700/40 transition-colors">
-                        <div class="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center {{ $loop->first ? 'bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300' : 'bg-gray-100 text-gray-400 dark:bg-zinc-700 dark:text-zinc-400' }}">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
-                                {{ $b['fecha']->format('d/m/Y H:i') }}
-                                @if ($loop->first)
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">Más reciente</span>
-                                @endif
-                            </p>
-                            <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $b['fecha']->diffForHumans() }}</p>
-                        </div>
-                        <span class="hidden sm:inline text-sm tabular-nums text-gray-600 dark:text-zinc-300">{{ $Repositorio::tamanio($b['bytes']) }}</span>
-                        <a href="{{ route('backups.descargar', $b['nombre']) }}" title="Descargar"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 border border-gray-200 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 dark:text-zinc-200 dark:border-zinc-600 dark:hover:bg-violet-500/10 dark:hover:text-violet-300 transition-colors shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                            Descargar
-                        </a>
-                    </li>
+                    @include('backups::partials.fila', ['b' => $b, 'masReciente' => $loop->first])
                 @endforeach
             </ul>
             @if ($anteriores > 0)
@@ -229,22 +207,19 @@
 
     {{-- Adjuntos --}}
     @if ($adjuntosActivos)
-        <section class="{{ $tarjeta }} overflow-hidden">
+        <section data-seccion="adjuntos" class="{{ $tarjeta }} overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100 dark:border-zinc-700">
-                <h3 class="text-base font-bold text-gray-900 dark:text-zinc-50">Backups de adjuntos</h3>
-                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Archivos adjuntos, cifrados. Se conservan los últimos {{ max(1, (int) config('backups.adjuntos.conservar', 4)) }}.</p>
+                @include('backups::partials.encabezado-seccion', [
+                    'titulo' => 'Adjuntos',
+                    'detalle' => 'Archivos subidos, cifrados. Se conservan los últimos '.max(1, (int) config('backups.adjuntos.conservar', 4)).'.',
+                    'icono' => 'm18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13',
+                    'color' => 'bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300',
+                ])
             </div>
             @if ($adjuntos->isNotEmpty())
                 <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
                     @foreach ($adjuntos as $a)
-                        <li class="flex items-center gap-4 px-5 py-3">
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-zinc-100">{{ $a['fecha']->format('d/m/Y H:i') }}</p>
-                                <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $a['fecha']->diffForHumans() }}</p>
-                            </div>
-                            <span class="hidden sm:inline text-sm tabular-nums text-gray-600 dark:text-zinc-300">{{ $Repositorio::tamanio($a['bytes']) }}</span>
-                            <a href="{{ route('backups.descargar', $a['nombre']) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 border border-gray-200 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 dark:text-zinc-200 dark:border-zinc-600 dark:hover:bg-violet-500/10 dark:hover:text-violet-300 transition-colors shrink-0">Descargar</a>
-                        </li>
+                        @include('backups::partials.fila', ['b' => $a, 'masReciente' => $loop->first])
                     @endforeach
                 </ul>
             @else

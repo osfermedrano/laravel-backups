@@ -254,9 +254,48 @@ class BackupAdjuntosTest extends TestCase
         $this->zipAdjuntos('2026-10-15-04-00-00');
 
         $this->actingAs($this->admin())->get(route('backups.index'))
-            ->assertSee('Backups de adjuntos')
+            ->assertSee('data-seccion="adjuntos"', false)
             ->assertSee(route('backups.descargar', 'adjuntos-2026-10-15-04-00-00.zip'), false)
             ->assertSee('Sin backups');
+    }
+
+    public function test_panel_separa_base_de_datos_y_adjuntos_con_su_encabezado()
+    {
+        Storage::disk('local')->put('mi-app/2026-10-14-03-00-00.zip', 'bd');
+        $this->zipAdjuntos('2026-10-15-04-00-00');
+
+        $this->actingAs($this->admin())->get(route('backups.index'))
+            ->assertDontSee('Últimos backups')
+            ->assertSeeInOrder([
+                'Generar backup',
+                'name="tipos[]" value="bd"',
+                'name="tipos[]" value="adjuntos"',
+                'data-seccion="bd"',
+                'Base de datos</h3>',
+                route('backups.descargar', '2026-10-14-03-00-00.zip'),
+                'data-seccion="adjuntos"',
+                'Adjuntos</h3>',
+                route('backups.descargar', 'adjuntos-2026-10-15-04-00-00.zip'),
+            ], false);
+    }
+
+    public function test_adjuntos_marca_el_mas_reciente_igual_que_base_de_datos()
+    {
+        $this->zipAdjuntos('2026-10-15-04-00-00');
+
+        $this->actingAs($this->admin())->get(route('backups.index'))
+            ->assertSeeInOrder(['data-seccion="adjuntos"', 'Más reciente'], false);
+    }
+
+    public function test_sin_adjuntos_activos_el_panel_no_cambia()
+    {
+        config(['backups.adjuntos.activo' => false]);
+
+        $this->actingAs($this->admin())->get(route('backups.index'))
+            ->assertSee('Últimos backups')
+            ->assertSee('Generar backup ahora')
+            ->assertDontSee('data-seccion="adjuntos"', false)
+            ->assertDontSee('Base de datos</h3>', false);
     }
 
     public function test_listado_de_bd_no_incluye_adjuntos()
