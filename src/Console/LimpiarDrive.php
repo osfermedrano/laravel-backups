@@ -29,7 +29,7 @@ class LimpiarDrive extends Command
 
         try {
             $destino = app(DestinoDrive::class);
-            $locales = $repositorio->listar()->pluck('nombre')->all();
+            $locales = $repositorio->listarTodos()->pluck('nombre')->all();
 
             $borrar = array_filter(
                 $destino->listar(),

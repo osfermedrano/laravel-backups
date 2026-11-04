@@ -15,18 +15,49 @@ class EstadoBackup
     private const MINUTOS = 15;
 
     /** @return bool false si ya había uno en proceso */
-    public function marcar(?int $userId): bool
+    public function marcar(?int $userId, string $tipo = 'bd'): bool
     {
-        return Cache::add(self::CLAVE, $userId ?? 0, now()->addMinutes(self::MINUTOS));
+        return Cache::add(self::clave($tipo), $userId ?? 0, now()->addMinutes(self::MINUTOS));
+    }
+
+    /**
+     * Marca todos los tipos, o ninguno si ya hay alguno en proceso.
+     *
+     * @param  string[]  $tipos
+     */
+    public function marcarVarios(array $tipos, ?int $userId): bool
+    {
+        if ($this->enProceso()) {
+            return false;
+        }
+
+        $marcados = [];
+
+        foreach ($tipos as $tipo) {
+            if (! $this->marcar($userId, $tipo)) {
+                array_walk($marcados, fn ($t) => $this->liberar($t));
+
+                return false;
+            }
+
+            $marcados[] = $tipo;
+        }
+
+        return true;
     }
 
     public function enProceso(): bool
     {
-        return Cache::has(self::CLAVE);
+        return Cache::has(self::clave('bd')) || Cache::has(self::clave('adjuntos'));
     }
 
-    public function liberar(): void
+    public function liberar(string $tipo = 'bd'): void
     {
-        Cache::forget(self::CLAVE);
+        Cache::forget(self::clave($tipo));
+    }
+
+    private static function clave(string $tipo): string
+    {
+        return $tipo === 'bd' ? self::CLAVE : self::CLAVE.':'.$tipo;
     }
 }

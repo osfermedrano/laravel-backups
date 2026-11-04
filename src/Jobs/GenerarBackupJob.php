@@ -27,16 +27,16 @@ class GenerarBackupJob implements ShouldQueue
 
     public function __construct(public ?int $solicitanteId = null) {}
 
-    public function handle(EjecutorBackup $ejecutor, NotificadorBackup $notificador, EstadoBackup $estado): void
+    public function handle(NotificadorBackup $notificador, EstadoBackup $estado): void
     {
         if ($this->solicitanteId === null) {
-            $estado->marcar(null); // automático: bloquea el botón manual mientras corre
+            $estado->marcar(null, $this->tipo()); // automático: bloquea el botón manual mientras corre
         }
 
         try {
             $resultado = blank(config('backup.backup.password'))
                 ? ResultadoBackup::fallo('Falta configurar la contraseña de cifrado (BACKUP_ARCHIVE_PASSWORD en .env). No se generan backups sin cifrar.')
-                : $ejecutor->ejecutar();
+                : $this->generar();
 
             // Copia remota (solo si el local salió bien y Drive está conectado). Nunca lanza.
             $resultado = app(SubidaDrive::class)->subir($resultado);
@@ -44,7 +44,7 @@ class GenerarBackupJob implements ShouldQueue
             Log::error('Backup: error inesperado', ['exception' => $e]);
             $resultado = ResultadoBackup::fallo('Error inesperado: '.$e->getMessage());
         } finally {
-            $estado->liberar();
+            $estado->liberar($this->tipo());
         }
 
         if (! $resultado->ok) {
@@ -57,7 +57,17 @@ class GenerarBackupJob implements ShouldQueue
     /** Si el worker mata el job (timeout), no dejar la marca "en proceso" colgada. */
     public function failed(?\Throwable $e): void
     {
-        app(EstadoBackup::class)->liberar();
+        app(EstadoBackup::class)->liberar($this->tipo());
+    }
+
+    protected function tipo(): string
+    {
+        return 'bd';
+    }
+
+    protected function generar(): ResultadoBackup
+    {
+        return app(EjecutorBackup::class)->ejecutar();
     }
 
     private function solicitante(): ?object

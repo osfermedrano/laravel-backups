@@ -31,6 +31,21 @@ return [
         'backup' => '03:00',
         'limpieza' => '03:30',
         'limpieza_drive' => '03:40',
+        'adjuntos_dia' => 0, // 0 = domingo
+        'adjuntos_hora' => '04:00',
+    ],
+
+    /*
+    | Backup opcional de archivos adjuntos: zip cifrado aparte, en la carpeta {backup.name}-adjuntos.
+    | - disco: disco local de origen.
+    | - ruta: carpeta a respaldar, relativa al disco. Obligatoria: nunca respalda todo el disco.
+    | - conservar: cantidad de zips a mantener.
+    */
+    'adjuntos' => [
+        'activo' => env('BACKUPS_ADJUNTOS', false),
+        'disco' => 'local',
+        'ruta' => 'adjuntos',
+        'conservar' => 4,
     ],
 
     // Panel

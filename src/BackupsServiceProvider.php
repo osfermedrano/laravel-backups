@@ -6,9 +6,11 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Osfermedrano\Backups\Backup\RepositorioBackups;
 use Osfermedrano\Backups\Console\LimpiarDrive;
 use Osfermedrano\Backups\Drive\DestinoDrive;
 use Osfermedrano\Backups\Drive\GoogleDriveDestino;
+use Osfermedrano\Backups\Jobs\GenerarBackupAdjuntosJob;
 use Osfermedrano\Backups\Jobs\GenerarBackupJob;
 use Osfermedrano\Backups\View\DatosPanel;
 
@@ -63,7 +65,7 @@ class BackupsServiceProvider extends ServiceProvider
         });
     }
 
-    /** Backup diario, limpieza local (Spatie) y limpieza espejo en Drive. */
+    /** Backup diario, limpieza local (Spatie), limpieza espejo en Drive y adjuntos semanal (si están activos). */
     public static function programar(Schedule $schedule): Schedule
     {
         if (! filter_var(config('backups.programacion.activa', true), FILTER_VALIDATE_BOOL)) {
@@ -73,6 +75,13 @@ class BackupsServiceProvider extends ServiceProvider
         $schedule->job(new GenerarBackupJob)->dailyAt((string) config('backups.programacion.backup', '03:00'));
         $schedule->command('backup:clean --disable-notifications')->dailyAt((string) config('backups.programacion.limpieza', '03:30'));
         $schedule->command('backups:limpiar-drive')->dailyAt((string) config('backups.programacion.limpieza_drive', '03:40'));
+
+        if (RepositorioBackups::adjuntosActivos()) {
+            $schedule->job(new GenerarBackupAdjuntosJob)->weeklyOn(
+                (int) config('backups.programacion.adjuntos_dia', 0),
+                (string) config('backups.programacion.adjuntos_hora', '04:00'),
+            );
+        }
 
         return $schedule;
     }

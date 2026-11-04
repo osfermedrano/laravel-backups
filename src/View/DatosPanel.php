@@ -31,6 +31,8 @@ class DatosPanel
             'enProceso' => $this->estado->enProceso(),
             'sinPassword' => blank(config('backup.backup.password')),
             'ultimo' => $ultimo,
+            'adjuntosActivos' => RepositorioBackups::adjuntosActivos(),
+            'adjuntos' => $this->repositorio->listarAdjuntos()->take($cantidad),
             'ultimoViejo' => $ultimo && $ultimo['fecha']->lt(now()->subHours((int) config('backups.horas_alerta', 26))),
         ]);
     }

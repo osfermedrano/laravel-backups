@@ -68,6 +68,19 @@ y en `config/backups.php`: `'volver_a' => ['ruta' => 'admin.configuracion', 'par
 
 Tailwind: agregá las vistas del paquete al escaneo de clases, por ejemplo `@source '../../vendor/osfermedrano/laravel-backups/resources/views';` (v4) o en `content` (v3).
 
+## Adjuntos (opcional)
+
+Respalda una carpeta de archivos en un zip cifrado aparte. Viene apagado. Se activa con `BACKUPS_ADJUNTOS=true` y se configura en `config/backups.php`:
+
+```php
+'adjuntos' => ['activo' => env('BACKUPS_ADJUNTOS', false), 'disco' => 'local', 'ruta' => 'adjuntos', 'conservar' => 4],
+```
+
+- El panel ofrece elegir base de datos, adjuntos o ambos. Con ambos genera dos zips.
+- Automático: una vez por semana, domingo 04:00 (`programacion.adjuntos_dia`, `programacion.adjuntos_hora`).
+- Se guarda en `{backup.name}-adjuntos`, con su propia retención: `backup:clean` no lo toca.
+- Cada corrida copia toda la carpeta. Para muchos GB conviene una herramienta incremental como restic.
+
 ## Producción
 
 - **Scheduler** (`* * * * * php artisan schedule:run`): el paquete programa backup 03:00, `backup:clean` 03:30 y `backups:limpiar-drive` 03:40 (configurable, desactivable con `BACKUPS_PROGRAMACION=false`).
@@ -89,6 +102,8 @@ Descargá el zip (panel o Drive), abrilo con la contraseña de `BACKUP_ARCHIVE_P
 ```bash
 mysql -u usuario -p base < db-dumps/mysql-base.sql
 ```
+
+Adjuntos: abrí el zip con la misma contraseña y copiá su contenido a la carpeta `adjuntos.ruta` del disco configurado.
 
 ## Licencia
 
